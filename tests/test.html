@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Unit Tests</title>
+  <style>
+    body { font-family: monospace; padding: 1rem; }
+    .pass { color: green; }
+    .fail { color: red; font-weight: bold; }
+    h2 { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<h2>Unit Tests</h2>
+<div id="output"></div>
+<script src="../data/country_data.js"></script>
+<script>
+const _results = [];
+function test(name, fn) {
+  try { fn(); _results.push({ name, pass: true }); }
+  catch(e) { _results.push({ name, pass: false, error: e.message }); }
+}
+function assert(val, msg) { if (!val) throw new Error(msg || 'Assertion failed'); }
+function assertEqual(a, b) {
+  if (a !== b) throw new Error(`Expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+}
+
+// Utility functions — pasted here in Task 5
+// Tests — added in Task 5
+
+window.addEventListener('load', () => {
+  const div = document.getElementById('output');
+  _results.forEach(r => {
+    const el = document.createElement('div');
+    el.className = r.pass ? 'pass' : 'fail';
+    el.textContent = (r.pass ? '✓ ' : '✗ ') + r.name + (r.error ? ': ' + r.error : '');
+    div.appendChild(el);
+  });
+});
+</script>
+</body>
+</html>
