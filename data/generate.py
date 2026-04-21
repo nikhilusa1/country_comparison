@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Run once to regenerate data/country_data.js from RestCountries API."""
-import json, urllib.request
+import json, sys, urllib.request
 
 url = "https://restcountries.com/v3.1/all?fields=cca3,ccn3,area,name"
-with urllib.request.urlopen(url) as resp:
-    raw = json.loads(resp.read())
+try:
+    with urllib.request.urlopen(url) as resp:
+        raw = json.loads(resp.read())
+except Exception as e:
+    print(f"Error fetching data: {e}", file=sys.stderr)
+    raise SystemExit(1)
 
 countries = {}
 for c in raw:
@@ -15,7 +19,7 @@ for c in raw:
     if alpha3 and numeric and area_km2 > 0:
         countries[alpha3] = {
             "name": name,
-            "area": round(area_km2 * 0.386102),
+            "area": max(1, round(area_km2 * 0.386102)),
             "numeric": numeric
         }
 
@@ -37,6 +41,7 @@ aliases = {
     "australia": "AUS", "aus": "AUS",
     "uae": "ARE", "emirates": "ARE",
     "vatican": "VAT", "holy see": "VAT", "vatican city": "VAT",
+    "burma": "MMR", "holland": "NLD", "east timor": "TLS",
     "south africa": "ZAF",
     "saudi arabia": "SAU",
     "south sudan": "SSD",
