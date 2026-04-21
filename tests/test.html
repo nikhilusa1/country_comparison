@@ -25,8 +25,60 @@ function assertEqual(a, b) {
   if (a !== b) throw new Error(`Expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
 }
 
-// Utility functions — pasted here in Task 5
-// Tests — added in Task 5
+const ACCENT_COLORS = ['#FF6B6B','#4ECDC4','#FFE66D','#A78BFA','#38BDF8','#84CC16'];
+function lookupCountry(input) {
+  const key = (input || '').trim().toLowerCase();
+  if (!key) return null;
+  const alpha3 = COUNTRY_ALIASES[key];
+  if (!alpha3) return null;
+  const data = COUNTRIES[alpha3];
+  if (!data) return null;
+  return { alpha3, name: data.name, area: data.area, numeric: data.numeric };
+}
+function formatArea(sqMiles) { return sqMiles.toLocaleString('en-US') + ' mi²'; }
+function compareCountries(c1, c2) {
+  if (c1.alpha3 === c2.alpha3) return { same: true };
+  const bigger  = c1.area >= c2.area ? c1 : c2;
+  const smaller = c1.area >= c2.area ? c2 : c1;
+  return { bigger, smaller, multiplier: (bigger.area / smaller.area).toFixed(1), same: false };
+}
+function pickTwoColors() {
+  const idx1 = Math.floor(Math.random() * ACCENT_COLORS.length);
+  let idx2 = Math.floor(Math.random() * (ACCENT_COLORS.length - 1));
+  if (idx2 >= idx1) idx2++;
+  return [ACCENT_COLORS[idx1], ACCENT_COLORS[idx2]];
+}
+
+test('lookupCountry: exact name', () => {
+  const r = lookupCountry('France');
+  assert(r !== null, 'should find France');
+  assertEqual(r.alpha3, 'FRA');
+  assert(r.area > 200000, 'France area > 200k mi²');
+});
+test('lookupCountry: alias usa', () => { assertEqual(lookupCountry('USA').alpha3, 'USA'); });
+test('lookupCountry: case insensitive', () => { assertEqual(lookupCountry('FRANCE').alpha3, 'FRA'); });
+test('lookupCountry: whitespace trimmed', () => { assertEqual(lookupCountry('  Germany  ').alpha3, 'DEU'); });
+test('lookupCountry: unknown returns null', () => { assertEqual(lookupCountry('Narnia'), null); });
+test('lookupCountry: empty returns null', () => { assertEqual(lookupCountry(''), null); });
+test('formatArea: commas and mi²', () => { assertEqual(formatArea(3796742), '3,796,742 mi²'); });
+test('formatArea: small number', () => { assertEqual(formatArea(116), '116 mi²'); });
+test('compareCountries: larger wins', () => {
+  const c1 = { alpha3: 'RUS', name: 'Russia', area: 6601668, numeric: '643' };
+  const c2 = { alpha3: 'NZL', name: 'New Zealand', area: 104428, numeric: '554' };
+  const r = compareCountries(c1, c2);
+  assertEqual(r.bigger.alpha3, 'RUS');
+  assert(parseFloat(r.multiplier) > 60, 'Russia 60x bigger');
+});
+test('compareCountries: same returns same:true', () => {
+  const c = { alpha3: 'FRA', name: 'France', area: 248429, numeric: '250' };
+  assertEqual(compareCountries(c, c).same, true);
+});
+test('pickTwoColors: always different', () => {
+  for (let i = 0; i < 20; i++) {
+    const [a, b] = pickTwoColors();
+    assert(a !== b, 'must differ');
+  }
+});
 
 window.addEventListener('load', () => {
   const div = document.getElementById('output');
